@@ -1,0 +1,298 @@
+% Biên dịch: lualatex report.tex  (chạy 2 lần cho mục lục + tham chiếu)
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}            % lualatex + luaotfload + font Unicode DejaVu
+\setmainfont{DejaVu Serif}[Scale=0.92]
+\setsansfont{DejaVu Sans}[Scale=0.90]
+\setmonofont{DejaVu Sans Mono}[Scale=0.80]
+% (Khong dung polyglossia de tranh phu thuoc luatexbase; tieng Viet render qua font Unicode.)
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\refname}{Tài liệu tham khảo}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\abstractname}{Tóm tắt}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{kw}{RGB}{0,90,160}
+\definecolor{cm}{RGB}{110,110,110}
+\definecolor{ok}{RGB}{20,130,40}
+\definecolor{bad}{RGB}{190,40,40}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{kw}\bfseries,
+  commentstyle=\color{cm}\itshape,
+  breaklines=true, breakatwhitespace=false,
+  columns=fullflexible, frame=single, framerule=0pt,
+  showstringspaces=false, xleftmargin=6pt, xrightmargin=6pt,
+  aboveskip=6pt, belowskip=6pt,
+}
+\usepackage{amssymb}   % \checkmark
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=kw, urlcolor=kw, citecolor=kw}
+\newcommand{\yes}{\textcolor{ok}{\checkmark}}
+\newcommand{\no}{\textcolor{bad}{\texttimes}}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\title{\textbf{Tái hiện và phân tích CVE-\textsc{Genie}}\\[4pt]
+\large Khung đa tác tử tự động tái hiện CVE thành exploit kiểm chứng được\\[6pt]
+\normalsize Đồ án môn Lập trình an toàn \& Khai thác lỗ hổng phần mềm (NT521.R11.ANTN)}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Báo cáo tái hiện bài báo \textit{``From CVE Entries to Verifiable Exploits: An Automated
+Multi-Agent Framework for Reproducing CVEs''} (CVE-\textsc{Genie}, arXiv:2509.01835). Vì bài báo
+\textbf{có mã nguồn công khai}, chúng tôi (1) giải thích phương pháp; (2) tái hiện thí nghiệm ở ba mức
+--- chạy lại các artifact exploit/verifier tác giả công bố trong Docker, chạy \textit{live} giai đoạn
+trích xuất dữ liệu, và tự hiện thực thủ công một exploit + verifier; (3) thực hiện một thí nghiệm
+\textbf{điểm cộng}: chạy khung tác tử trên một LLM mã nguồn mở, cục bộ, miễn phí (Qwen2.5-3B) để kiểm
+chứng và làm rõ thêm phát hiện của bài báo về giới hạn của open-model, kèm một cải tiến prompt được đo
+trước/sau. Toàn bộ phần lõi được thực hiện \textbf{không dùng API trả phí}. Mọi kết quả đều kèm lệnh
+tái lập.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+\section{Giới thiệu: ngữ cảnh, vai trò, vấn đề}
+
+Mỗi năm có hàng chục nghìn lỗ hổng phần mềm được công bố (hơn 40.000 trong năm 2025 theo NVD). Nghiên
+cứu bảo mật --- đặc biệt các phương pháp dựa trên học máy để phát hiện/vá lỗ hổng --- cần
+\textbf{tập dữ liệu chất lượng cao có ground-truth tin cậy}: mã nguồn bị lỗi, môi trường dựng lại được,
+exploit hoạt động, và bước xác thực. Tuy nhiên các kho như NVD chủ yếu \textit{cảnh báo} quản trị viên
+nên thường thiếu các chi tiết đó; tạo ra chúng rất tốn công: Mu và cộng sự tốn hơn 3.600 giờ với 43
+chuyên gia để tái hiện 368 lỗ hổng bộ nhớ Linux.
+
+\textbf{Vai trò} của CVE-\textsc{Genie}: nhận một \textit{CVE ID} làm đầu vào, tự động thu thập tài
+nguyên, \textbf{dựng lại} môi trường bị lỗi, \textbf{sinh} exploit/PoC và một \textbf{verifier} xác nhận
+exploit --- qua đó sản xuất các ``instance tái hiện được'' ở quy mô lớn. Bài báo đạt tái hiện khoảng
+\textbf{51\% (428/841)} CVE công bố 2024--2025, chi phí trung bình \textbf{\$2{,}77}/CVE.
+
+\paragraph{Ràng buộc của đồ án.} Chúng tôi chỉ dùng tài nguyên \textbf{miễn phí}: không API LLM trả phí,
+máy cá nhân (GPU RTX~3050 6\,GB, RAM 7{,}6\,GB, Docker). Điều may mắn: tác giả đã \textbf{công bố đầy đủ
+mã nguồn, 429 artifact tái hiện và toàn bộ log hội thoại tác tử}, cho phép tái hiện thí nghiệm mà
+\textit{không cần} gọi LLM; phần LLM được dành cho thí nghiệm điểm cộng.
+
+\section{Phương pháp CVE-\textsc{Genie}}
+
+\subsection{Tiêu chí EAGER}
+Bài báo định nghĩa 5 tiêu chí của một hệ tái hiện CVE lý tưởng (bảng~\ref{tab:eager}); CVE-\textsc{Genie}
+là hệ duy nhất thỏa cả năm.
+
+\begin{table}[h]\centering
+\begin{tabular}{@{}cll@{}}
+\toprule
+& Tiêu chí & Ý nghĩa \\ \midrule
+\textbf{E} & Exploit Generation & Tạo exploit/PoC kích hoạt tin cậy lỗ hổng \\
+\textbf{A} & Assessment & Có verifier/sanitizer tự đánh giá exploit thành công hay không \\
+\textbf{G} & Generalization & Tổng quát qua nhiều CWE, ngôn ngữ, loại dự án \\
+\textbf{E} & End-to-end & Tự động hoàn toàn mọi giai đoạn \\
+\textbf{R} & Rebuild & Dựng lại môi trường bị lỗi gốc \\ \bottomrule
+\end{tabular}
+\caption{Năm tiêu chí EAGER.}\label{tab:eager}
+\end{table}
+
+\subsection{Kiến trúc bốn module}
+Hệ phân rã việc tái hiện thành bốn module phụ thuộc nhau; mỗi module (trừ phần tất định) dùng cặp
+tác tử \textit{developer} + \textit{critic} theo vòng ReAct để tự sửa lỗi.
+
+\begin{enumerate}
+\item \textbf{Processor.} \textit{Data Processor} (tất định, không LLM) định vị repo, xác định phiên bản
+bị lỗi, tải mã nguồn, trích mô tả/CWE/patch/advisory. \textit{Knowledge Builder} (LLM nhẹ o4-mini) chưng
+cất thành \textbf{knowledge base} có cấu trúc làm bộ nhớ dài hạn cho các tác tử.
+\item \textbf{Builder.} \textit{Pre-Requisite Dev} lập kế hoạch, \textit{Setup Dev} thực thi dựng môi
+trường, \textit{Setup Critic} đánh giá log và phản hồi.
+\item \textbf{Exploiter.} \textit{Exploit Dev} + \textit{Exploit Critic} sinh và tinh chỉnh exploit.
+\item \textbf{CTF Verifier.} \textit{Verifier Dev} sinh verifier; \textit{Flag Checker} (tất định) chạy
+thử, exploit thành công thì in một \textbf{flag} bí mật (vd \code{3xploit66full}); \textit{Verifier Critic}
+bắt các verifier yếu/bypass được. Lặp tối đa 5 lần.
+\end{enumerate}
+
+\subsection{Chọn LLM và kỹ thuật prompt}
+Bài báo khảo sát 10 LLM trên tập \code{DS}=60 CVE và chọn cấu hình tối ưu theo từng module:
+Knowledge Builder/Builder-dev = o4-mini; Exploiter/Verifier-dev = o3; critic phù hợp mỗi module.
+\textbf{Phát hiện cốt lõi} (ta sẽ kiểm chứng ở \S\ref{sec:bonus}): các open-model (Qwen3, DeepSeek,
+Llama-4) \textit{không tin cậy} ở tool-calling agentic nên bị loại khỏi vai developer. Đáng chú ý, một
+agent o3 \textbf{đơn khối} (gộp mọi vai) \textbf{không tái hiện nổi dù chỉ một CVE} --- chứng tỏ kiến
+trúc mô-đun là thiết yếu.
+
+\subsection{Đánh giá của bài báo}
+Trên \code{DL}=841 CVE (186 CWE, 29 ngôn ngữ, 440 dự án), tái hiện \textbf{428} CVE (141 CWE, 22 ngôn
+ngữ, 267 dự án). Khoảng 49\% CVE thiếu PoC. Thất bại chủ yếu do vượt chi phí/thời gian (kẹt ở bước build
+$\sim$41\%, ở sinh exploit $\sim$59\%). Ablation dữ liệu thiếu (tập \code{DR}): bỏ advisory 11/15, bỏ
+patch 10/15, chỉ còn mô tả 9/15 --- vẫn tái hiện được nhưng tốn hơn.
+
+\section{Tái hiện thí nghiệm}
+
+Chúng tôi tái hiện ở ba mức, tất cả \textbf{không dùng API trả phí}. CVE xuyên suốt là
+\textbf{CVE-2024-4340} (sqlparse $<$0.5.0, DoS do đệ quy không kiểm soát, CWE-674) --- cũng là ví dụ
+của bài báo.
+
+\subsection{Mức A --- Chạy lại artifact đã công bố trong Docker}
+Với mỗi CVE, chúng tôi dựng đúng phiên bản phần mềm bị lỗi trong Docker rồi chạy nguyên
+\code{exploit.py} + \code{verifier.py} tác giả công bố; thành công khi verifier in đúng flag
+\code{3xploit66full} và thoát mã 0.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}llll c c@{}}
+\toprule
+CVE & Dự án/phiên bản & Ngôn ngữ & CWE & Dựng env & Ra flag \\ \midrule
+CVE-2024-4340 & sqlparse 0.4.4 & Python & 674 Recursion DoS & \yes & \yes \\
+CVE-2024-4032 & CPython 3.8.19 \code{ipaddress} & Python & phân loại IP sai & \yes & \yes \\
+CVE-2024-45390 & @blakeembrey/template 1.1.0 & Node & 94 Code Injection & \yes & \yes \\
+CVE-2024-21535 & markdown-to-jsx 7.3.2 & Node & 79 XSS & \no\,(build) & --- \\ \bottomrule
+\end{tabular}
+\caption{Kết quả replay: 3/4 CVE chạy end-to-end ra flag, phủ 2 ngôn ngữ và 3 lớp lỗi.}\label{tab:replay}
+\end{table}
+
+\textbf{3/4 thành công.} CVE-2024-21535 \textbf{thất bại ở bước build} (\code{microbundle}/babel báo
+\textit{SyntaxError: Missing semicolon} khi biên dịch TSX trên Node 18/20). Đây đúng là
+\textbf{nguyên nhân thất bại số một} mà bài báo nêu --- \textit{dựng lại môi trường} khó hơn sinh
+exploit; tác giả chạy trong DevContainer có pin toolchain, ngoài môi trường đó build dễ vỡ.
+
+\textbf{Chất lượng verifier.} Verifier không chỉ bắt ``có crash'' mà kiểm tra \textit{đúng loại và vị
+trí lỗi}: ví dụ CVE-2024-4340 chỉ chấp nhận khi có \code{RecursionError} \textit{và} traceback chứa
+\code{sqlparse/sql.py}. Đây là hiện thực tốt của tiêu chí \textit{Assessment} (EAGER).
+
+\subsection{Mức B --- Chạy \textit{live} giai đoạn Data Processor}
+Chúng tôi chạy thật \code{cve\_data.py} (chỉ cần \code{GITHUB\_TOKEN} miễn phí + trình duyệt Playwright).
+Để tránh clone kho \code{cvelistV5} khổng lồ ($>$300k file), chúng tôi tải đúng JSON cần vào đường dẫn
+mà script mong đợi.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+CVE & patch & version & version trên GitHub & advisory & Kết luận \\ \midrule
+CVE-2024-4340 & \yes & \yes & \yes & \yes & \textbf{Ready to reproduce} \\
+CVE-2024-4032 & \yes & \yes & \yes & \yes & \textbf{Ready to reproduce} \\
+CVE-2024-45390 & \yes & \yes & \no & \yes & Missing data \\ \bottomrule
+\end{tabular}
+\caption{Processor live: hai CVE ``Ready'', một CVE thiếu dữ liệu.}\label{tab:proc}
+\end{table}
+
+Dữ liệu trích \textit{live} cho CVE-2024-4340 \textbf{khớp chính xác} knowledge base tác giả công bố
+(\code{sw\_version}=0.4.4, 1 patch commit, 1 advisory, CWE-674) --- xác nhận độ tin cậy của Processor.
+CVE-2024-45390 bị ``Missing data'' do trường phiên bản ghi dạng dải (\code{< 1.2.0}) nên không tra được
+tag trên GitHub; theo \code{PROCESSING.md} chúng tôi bổ sung thủ công \code{sw\_version=v1.1.0} và URL
+tải mã nguồn (trả HTTP 200), minh hoạ cơ chế \textit{Robustness to Incomplete Data} của bài báo.
+
+\subsection{Mức C --- Hiện thực thủ công + phát hiện verifier yếu}
+Chúng tôi tự viết \code{poc.py} và \code{verifier.py} cho CVE-2024-4340 (không copy từ CVE-\textsc{Genie}).
+\textbf{Phiên bản verifier đầu} kiểm tra lỏng \code{"RecursionError" in stderr} đã bị
+\textbf{false-positive trên bản đã vá 0.5.0}: bản vá bắt \code{RecursionError} rồi raise lại
+\code{SQLParseError} (chained exception ``\code{from err}''), nên traceback \textit{vẫn chứa} chuỗi
+``RecursionError''. Chúng tôi khắc phục bằng cách xét \textbf{ngoại lệ cuối cùng} thực sự thoát ra:
+
+\begin{lstlisting}[language=Python]
+def exploit_succeeded(proc):
+    term = terminal_exception(proc.stderr)      # dong ngoai le cuoi cung
+    return (proc.returncode != 0
+            and "sqlparse/sql.py" in proc.stderr
+            and term.startswith("RecursionError")  # ban loi
+            and "SQLParseError" not in term)        # loai ban va
+\end{lstlisting}
+
+Sau sửa: bản lỗi 0.4.4 \yes\ ra flag; bản vá 0.5.0 \no\ bị loại (thoát mã 1). Đây \textbf{chính xác} là
+vấn đề ``verifier yếu/bypass được'' mà \textit{Verifier Critic} của bài báo sinh ra để bắt --- chúng tôi
+đã tự gặp và tự sửa, cho thấy vòng developer$\leftrightarrow$critic giải quyết một vấn đề có thật.
+
+\section{Điểm cộng: thí nghiệm LLM cục bộ + cải tiến}\label{sec:bonus}
+
+\subsection{Thiết lập (miễn phí, \$0)}
+Chúng tôi dựng một bản hiện thực \textbf{tối giản} module Exploiter (một developer ReAct + một critic),
+tool chạy trong Docker cô lập (\code{--network none}, 1\,GB RAM), có \textbf{oracle chấm điểm độc lập}.
+LLM là \textbf{Qwen2.5-3B-Instruct} (GGUF Q4\_K\_M, open-weight) chạy qua \code{llama-cpp-python} build
+CUDA, nạp \textbf{in-process}, offload toàn bộ 37 layer lên GPU 6\,GB. So với o3/o4-mini \$2{,}77/CVE của
+bài báo, chi phí ở đây là \textbf{\$0}.
+
+\subsection{Kết quả}
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+CVE & variant & success & steps & valid/malformed tool-call & tool\_errors \\ \midrule
+CVE-2024-4032 (logic) & baseline & \textbf{\yes} & 4 & 4\,/\,0 & 0 \\
+CVE-2024-4032 (logic) & improved & \no & 4 & 4\,/\,0 & 2 \\
+CVE-2024-4340 (DoS)   & baseline ($\times$3) & \no & 12 & 12\,/\,0 & 5 \\
+CVE-2024-4340 (DoS)   & improved ($\times$2) & \no & 12 & 12\,/\,0 & 6 \\ \bottomrule
+\end{tabular}
+\caption{Sáu lần chạy agent với Qwen2.5-3B cục bộ.}\label{tab:bonus}
+\end{table}
+
+\paragraph{Format tool-call hoàn hảo.} Mọi lần chạy đều \code{malformed=0} --- model 3B bám đúng giao
+thức ReAct text. Đây là \textbf{sắc thái bổ sung} cho bài báo (vốn quan sát Qwen ``mô tả mà không gọi
+tool''): với giao thức text ép chặt, open-model nhỏ \textit{gọi tool được}.
+
+\paragraph{Nhưng yếu ở suy luận.} Trên CVE-2024-4340 (cần payload khéo) có ba kiểu lỗi: (1) chạy
+\code{/work/exploit.py} như shell thay vì \code{python3} $\to$ lỗi; (2) payload là khoảng trắng thay vì
+\textit{lồng} \code{[}$\times$N\code{]}$\times$N nên không thể gây đệ quy; (3) lặp y hệt theo lỗi, không
+thích nghi. Ngược lại CVE-2024-4032 (logic bug đơn giản) \textbf{thành công} ngay ở baseline trong 4 bước.
+
+\subsection{Cải tiến prompt và đo trước/sau}
+Chúng tôi thêm ba chỉ dẫn nhắm đúng ba lỗi. Trên CVE-2024-4340, cải tiến \textbf{vá được 2/3}: model
+chuyển sang \code{python3 <file>} và sang payload lồng --- nhưng vẫn chưa thành công do (i) lỗi mới: model
+nhầm ký tự phân tách \code{||} của tool ghi file; (ii) vẫn lặp không thích nghi. Quan trọng hơn: cùng cải
+tiến đó lại \textbf{phá} CVE-2024-4032 (chỉ dẫn ``payload lồng'' vốn cho recursion bị áp sai cho logic
+bug). \textbf{Bài học:} một prompt cải tiến dùng chung \textit{tổng quát kém qua các lớp CWE} --- giải
+thích và củng cố trực tiếp lựa chọn của CVE-\textsc{Genie}: dùng \textbf{prompt kỹ-thuật-hoá riêng theo
+từng module} và \textbf{model mạnh} cho từng vai, thay vì một prompt/model chung.
+
+\section{Biện luận ưu/nhược điểm}
+
+\paragraph{Ưu điểm.}
+\begin{itemize}
+\item Là framework \textbf{duy nhất thỏa đủ EAGER}; verifier kiểu CTF chặt, phân biệt được bản lỗi/bản vá
+(xác nhận ở mức A và C).
+\item \textbf{Phân rã mô-đun + cặp developer/critic} là thiết yếu: thí nghiệm của chúng tôi cho thấy khi
+thiếu vòng critic điều khiển sửa lỗi, agent nhỏ kẹt lặp (lỗi 3); bài báo cũng chỉ ra agent đơn khối o3
+không tái hiện nổi 1 CVE.
+\item \textbf{Prompt riêng theo tác vụ} có cơ sở thực nghiệm: prompt chung phản tác dụng xuyên CWE.
+\item \textbf{Bền với dữ liệu thiếu} (mức B minh hoạ cơ chế bổ sung); tổng quát nhiều CWE/ngôn ngữ; rẻ
+hơn thủ công nhiều bậc.
+\end{itemize}
+
+\paragraph{Nhược điểm.}
+\begin{itemize}
+\item \textbf{Phụ thuộc LLM mạnh, closed-source} (o3/o4-mini) $\to$ tốn tiền, khó tái lập khi không có API;
+thay bằng open-model nhỏ thì năng lực sụp đổ ở lỗ hổng không tầm thường (\S\ref{sec:bonus}).
+\item \textbf{Dựng môi trường là khâu yếu nhất} (mức A: build Node fail; bài báo: $\sim$41\% thất bại kẹt
+ở build); DevContainer dễ crash với ứng dụng nhiều dịch vụ.
+\item \textbf{Rủi ro ``ảo giác''/tự đánh giá sai}: model 3B có lúc tự nhận ``không exploit được'' dù đã
+thành công $\to$ cần Flag Checker + Verifier Critic thay vì tin lời developer.
+\item Phụ thuộc chất lượng record cvelistV5 (phiên bản dạng dải không tra được tag); $\sim$49\% CVE thiếu
+PoC; kém ở domain binary-heavy (desktop 17{,}6\%, blockchain 7{,}7\%).
+\end{itemize}
+
+\section{Kết luận, hạn chế và tái lập}
+Chúng tôi đã hiểu, giải thích và \textbf{tái hiện thành công} các thí nghiệm cốt lõi của CVE-\textsc{Genie}
+mà không dùng API trả phí (3/4 CVE replay ra flag, Processor chạy live khớp dữ liệu tác giả, tự hiện thực
+exploit/verifier và phát hiện lỗi verifier yếu), cùng một thí nghiệm điểm cộng chạy LLM cục bộ làm rõ
+giới hạn open-model và kiểm chứng các lựa chọn thiết kế của bài báo.
+
+\textbf{Hạn chế của bản tái hiện:} do ràng buộc tài nguyên, phần lõi dựa trên artifact tác giả công bố
+(không chạy lại toàn bộ pipeline bằng o3/o4-mini); thí nghiệm điểm cộng chỉ 1 module + model 3B + 2 CVE,
+nhằm minh hoạ định tính, không phủ nhận con số 51\% của bài báo.
+
+\paragraph{Tái lập.} Mọi bước có lệnh cụ thể:
+\code{repro/artifacts/run\_all.sh} (replay), \code{cve-genie/src/data/scripts/cve\_data.py} (Processor),
+\code{repro/manual/CVE-2024-4340/} (thủ công), \code{local\_agent/agent.py} + \code{experiments/}
+(điểm cộng). Chi tiết trong thư mục \code{docs/}.
+
+\begin{thebibliography}{9}
+\bibitem{cvegenie} S.~Ullah et al. \textit{From CVE Entries to Verifiable Exploits: An Automated
+Multi-Agent Framework for Reproducing CVEs}. arXiv:2509.01835, 2026.
+\bibitem{repo} Mã nguồn CVE-\textsc{Genie}: \url{https://github.com/BUseclab/cve-genie}.
+\bibitem{mu} D.~Mu et al. Nghiên cứu tái hiện lỗ hổng bộ nhớ (được trích trong \cite{cvegenie}).
+\end{thebibliography}
+
+\end{document}

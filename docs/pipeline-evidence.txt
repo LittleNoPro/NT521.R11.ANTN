@@ -1,0 +1,38 @@
+# Evidence: the real CVE-GENIE orchestrator requires a paid OpenAI API
+# captured 2026-10-31T14:34Z
+
+## main.py gates on MODEL and loads OPENAI creds from .env:
+if not os.environ.get('ENV_PATH'):
+    load_dotenv()
+else:
+    dotenv_path = os.environ['ENV_PATH']
+    load_dotenv(dotenv_path=dotenv_path)
+
+if not os.environ.get('MODEL'):
+    exit(1)
+
+MODEL = os.environ['MODEL']
+
+## Per-module hardcoded model names (paid OpenAI), one per agent:
+agents/repoCritic.py:40:            model='gpt-4o-mini',
+agents/repoCritic.py:85:    __LLM_MODEL__ = 'o3'
+agents/repoBuilder.py:42:            model='gpt-4o-mini',
+agents/repoBuilder.py:73:    __LLM_MODEL__ = 'o4-mini'
+agents/exploiter.py:42:            model='gpt-4o-mini',
+agents/exploiter.py:86:    __LLM_MODEL__ = 'o3'
+agents/sanityGuy.py:44:            model='gpt-4o-mini',
+agents/sanityGuy.py:81:    __LLM_MODEL__ = 'o3'
+agents/ctfVerifier.py:35:            model='gpt-4o-mini',
+agents/ctfVerifier.py:72:    __LLM_MODEL__ = 'o3'
+agents/preReqBuilder.py:42:            model='gpt-4o-mini',
+agents/preReqBuilder.py:83:    __LLM_MODEL__ = 'o4-mini'
+agents/knowledgeBuilder.py:6:    __LLM_MODEL__ = 'o4-mini'
+agents/exploitCritic.py:40:            model='gpt-4o-mini',
+agents/exploitCritic.py:85:    __LLM_MODEL__ = 'o4-mini'
+
+## Our src/.env has only a free GITHUB_TOKEN (no OPENAI_API_KEY):
+GITHUB_TOKEN=
+
+## Running main.py without MODEL/OPENAI key exits immediately (gate at line 22-23):
+$ python main.py --cve CVE-2024-4340 --json data/example/test.json --run-type build
+exit code = 1  (1 = MODEL unset gate)

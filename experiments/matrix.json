@@ -1,0 +1,41 @@
+{
+  "n_runs": 25,
+  "matrix": {
+    "CVE-2021-23336": {
+      "3B": {
+        "generic": "0/1",
+        "none": "0/1"
+      },
+      "7B": {
+        "generic": "0/1",
+        "none": "1/1"
+      }
+    },
+    "CVE-2024-4032": {
+      "3B": {
+        "baseline": "1/1",
+        "improved": "0/1"
+      },
+      "7B": {
+        "baseline": "1/1",
+        "generic": "1/1",
+        "improved": "1/1"
+      }
+    },
+    "CVE-2024-4340": {
+      "3B": {
+        "?": "0/1",
+        "baseline": "0/1",
+        "cwe": "0/1",
+        "generic": "0/1",
+        "improved": "0/2"
+      },
+      "7B": {
+        "baseline": "0/3",
+        "cwe": "1/1",
+        "generic": "0/3",
+        "improved": "3/3"
+      }
+    }
+  }
+}

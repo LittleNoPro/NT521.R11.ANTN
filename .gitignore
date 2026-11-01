@@ -1,0 +1,59 @@
+# ============================================================
+#  NT521.R11.ANTN — CVE-GENIE reproduction
+#  .gitignore
+# ============================================================
+
+# --- Secrets (NEVER commit) ---------------------------------
+.env
+*.env
+!*.env.example
+cve-genie/src/.env
+
+# --- Local LLM weights (GitHub rejects files > 100 MB) ------
+local_agent/models/
+*.gguf
+*.bin
+*.safetensors
+*.pt
+
+# --- Python virtual environment -----------------------------
+env/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- LaTeX build artifacts (keep .tex and .pdf) -------------
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.bbl
+report/*.blg
+report/*.nav
+report/*.snm
+report/*.vrb
+report/b*.log
+report/build*.log
+
+# --- Reproduction artifacts (large, regenerable) ------------
+repro/artifacts/
+experiments/corpus/
+**/.yarn/cache/
+
+# --- Docker / OS / editor junk ------------------------------
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
