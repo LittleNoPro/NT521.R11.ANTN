@@ -1,0 +1,21 @@
+<section id="verdict" data-transition="fade" style="background:#F7F6F1;color:#1C2434;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:38px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#1F8F88">Our verdict on CVE-GENIE</p>
+<h2 style="font-family:'Space Grotesk', Georgia, serif;font-size:58px;font-weight:600;line-height:1.08;color:#152238">What holds up — and what we'd push on</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:18px;background:#EAF3F2;border:1px solid #BFE0DC;border-radius:18px;padding:36px 38px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#176B65">Strengths</p>
+<p style="font-size:26px;color:#3C5450;line-height:1.4">End-to-end + <b>deterministic</b> flag check — reproductions are real, not LLM-judged.</p>
+<p style="font-size:26px;color:#3C5450;line-height:1.4">Modular developer/critic loops; each module uses a right-sized model.</p>
+<p style="font-size:26px;color:#3C5450;line-height:1.4">Scale and economics are credible — <b>$2.77/CVE</b>, which we recomputed.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:18px;background:#FBF1DD;border:1px solid #EAD3A0;border-radius:18px;padding:36px 38px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#8A5B12">Weaknesses</p>
+<p style="font-size:26px;color:#6B4E1C;line-height:1.4">~51% reproduced — the <b>other half</b> is unexplained per-CVE.</p>
+<p style="font-size:26px;color:#6B4E1C;line-height:1.4">Hard-wired to <b>paid frontier models</b>; no free path to run it whole.</p>
+<p style="font-size:26px;color:#6B4E1C;line-height:1.4">Prompt hints carry real signal — reasoning vs hint is <b>hard to separate</b>.</p>
+</div>
+</div>
+<p style="font-size:29px;color:#1C2434;line-height:1.4;width:1600px">We validated the strengths with our own code, and turned each weakness into a <b style="color:#1F8F88">concrete experiment</b> rather than an assertion.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:22px;color:#8A93A6">NT521.R11.ANTN · Critical evaluation</p>
+<aside>Our assessment: the deterministic flag check, the modular right-sized models, and the credible economics are genuine strengths we verified ourselves. The open questions are the unexplained failing half, the hard dependency on paid models, and the difficulty of separating reasoning from prompt hints. We addressed each with an experiment rather than an opinion.</aside>
+</section>

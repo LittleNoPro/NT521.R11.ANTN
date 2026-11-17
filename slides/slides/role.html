@@ -1,0 +1,26 @@
+<section id="role" data-transition="fade" style="background:#152238;color:#EDEFF3;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:48px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2BB3A8">What CVE-GENIE does</p>
+<h2 style="font-family:'Space Grotesk', Georgia, serif;font-size:60px;font-weight:600;line-height:1.1;color:#F2F5FA;width:1500px">From a single <span style="color:#2BB3A8">CVE ID</span>, it automatically produces a reproducible, verified exploit</h2>
+<div style="display:flex;align-items:center;gap:18px;width:1600px">
+<p style="font-size:26px;color:#EDEFF3;background:#1E3050;border:1px solid #33496E;border-radius:12px;padding:18px 22px">CVE ID</p>
+<x-shape kind="arrow-right" style="background:#2BB3A8;width:44px;height:26px"></x-shape>
+<p style="font-size:26px;color:#EDEFF3;background:#1E3050;border:1px solid #33496E;border-radius:12px;padding:18px 22px">Gather</p>
+<x-shape kind="arrow-right" style="background:#2BB3A8;width:44px;height:26px"></x-shape>
+<p style="font-size:26px;color:#EDEFF3;background:#1E3050;border:1px solid #33496E;border-radius:12px;padding:18px 22px">Rebuild env</p>
+<x-shape kind="arrow-right" style="background:#2BB3A8;width:44px;height:26px"></x-shape>
+<p style="font-size:26px;color:#EDEFF3;background:#1E3050;border:1px solid #33496E;border-radius:12px;padding:18px 22px">Exploit</p>
+<x-shape kind="arrow-right" style="background:#2BB3A8;width:44px;height:26px"></x-shape>
+<p style="font-size:26px;color:#EDEFF3;background:#1E3050;border:1px solid #33496E;border-radius:12px;padding:18px 22px">Verify + flag</p>
+</div>
+<div style="display:flex;gap:64px;margin-top:12px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:84px;font-weight:700;color:#2BB3A8">~51%</p>
+<p style="font-size:28px;color:#9FB0C8">CVEs reproduced (428 / 841, 2024–25)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:84px;font-weight:700;color:#2BB3A8">$2.77</p>
+<p style="font-size:28px;color:#9FB0C8">average LLM cost per reproduced CVE</p>
+</div>
+</div>
+<aside>CVE-GENIE takes a CVE ID, gathers the repo and advisory, rebuilds the vulnerable environment, synthesizes an exploit, and generates a verifier that confirms it — producing reproducible instances at scale. The headline results: about 51% reproduced at an average of $2.77 each.</aside>
+</section>

@@ -1,0 +1,21 @@
+<section id="levelC" data-transition="fade" style="background:#F7F6F1;color:#1C2434;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#1F8F88">Level C · We hit a weak verifier — and fixed it</p>
+<h2 style="font-family:'Space Grotesk', Georgia, serif;font-size:56px;font-weight:600;line-height:1.08;color:#152238;width:1500px">Our first verifier false-positived on the <i>patched</i> version</h2>
+<div style="display:flex;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FBECEA;border:1px solid #E7BDB4;border-radius:16px;padding:34px 34px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#9A3322">The trap</p>
+<p style="font-size:27px;color:#6E3A30;line-height:1.4">The 0.5.0 <b>patch</b> catches <span style="font-family:'IBM Plex Sans'">RecursionError</span> and re-raises it chained — so the traceback <i>still contains</i> "RecursionError". A naive check passes the fixed code.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#EAF3F2;border:1px solid #BFE0DC;border-radius:16px;padding:34px 34px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#176B65">Our fix</p>
+<p style="font-size:27px;color:#3C5450;line-height:1.4">Check the <b>terminal</b> exception that actually escapes: accept only a bare <span style="font-family:'IBM Plex Sans'">RecursionError</span> from <span style="font-family:'IBM Plex Sans'">sqlparse/sql.py</span>, reject if it became <span style="font-family:'IBM Plex Sans'">SQLParseError</span>.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;align-items:center;margin-top:4px">
+<p style="font-size:30px;color:#1C2434;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:12px;padding:20px 28px">Vulnerable 0.4.4 &nbsp;<b style="color:#2E7D4F">✓ flag</b></p>
+<p style="font-size:30px;color:#1C2434;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:12px;padding:20px 28px">Patched 0.5.0 &nbsp;<b style="color:#B23A28">✗ rejected (exit 1)</b></p>
+<p style="font-size:28px;color:#1F8F88;line-height:1.35;flex:1">This is exactly the bug the paper's <b>Verifier Critic</b> exists to catch — we met it and fixed it ourselves.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:22px;color:#8A93A6">NT521.R11.ANTN · Reproducing CVE-GENIE · CVE-2024-4340, CWE-674</p>
+<aside>We wrote our own exploit and verifier for the sqlparse DoS. Our first verifier was fooled by the patched version because the fix re-raises the recursion error chained, leaving the string in the traceback. Fixing it by inspecting the terminal exception shows we understand the vulnerability at the mechanism level — and demonstrates why the developer/critic loop matters.</aside>
+</section>

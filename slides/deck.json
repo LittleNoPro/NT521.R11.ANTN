@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-10-31T15:00:00Z" },
+  "lists": "css",
+  "title": "CVE-GENIE — Reproduction & Analysis (NT521)",
+  "order": ["cover","problem","role","method","eager","approach","levelA","levelC","levelD","levelE","bonus-size","bonus-prompt","verdict","conclusion"],
+  "sections": {
+    "intro": { "description": "Why automated CVE reproduction matters and what CVE-GENIE is", "start": "cover" },
+    "method": { "description": "The four-module multi-agent pipeline and the EAGER criteria", "start": "method" },
+    "repro": { "description": "Reproducing the experiments at five levels, free and local", "start": "approach" },
+    "bonus": { "description": "Local open-model study: a size threshold and prompt specificity", "start": "bonus-size" },
+    "close": { "description": "Verdict, strengths, weaknesses and takeaways", "start": "verdict" }
+  },
+  "faces": {
+    "space-grotesk": { "family": "Space Grotesk", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" },
+    "ibm-plex-sans": { "family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" }
+  },
+  "designSystems": []
+}

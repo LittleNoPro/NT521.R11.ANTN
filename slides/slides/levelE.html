@@ -1,0 +1,17 @@
+<section id="levelE" data-transition="fade" style="background:#F7F6F1;color:#1C2434;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:38px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#1F8F88">Level E · The free-tier boundary</p>
+<h2 style="font-family:'Space Grotesk', Georgia, serif;font-size:56px;font-weight:600;line-height:1.08;color:#152238;width:1520px">A full run needs a paid API — by construction, not for lack of effort</h2>
+<div style="display:flex;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:16px;padding:34px 34px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#152238">What we found in the code</p>
+<p style="font-size:26px;color:#55607A;line-height:1.4">The four LLM modules <b style="color:#1C2434">hardcode paid OpenAI models</b>: <span style="font-family:'IBM Plex Sans'">o4-mini</span> (builders), <span style="font-family:'IBM Plex Sans'">o3</span> (exploiter, verifier), <span style="font-family:'IBM Plex Sans'">gpt-4o-mini</span> (base). <span style="font-family:'IBM Plex Sans'">main.py</span> exits without a key.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#EAF3F2;border:1px solid #BFE0DC;border-radius:16px;padding:34px 34px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#176B65">Two takeaways</p>
+<p style="font-size:26px;color:#3C5450;line-height:1.4">This matches the paper's per-module config <b>exactly</b> — and we document the boundary with evidence (<span style="font-family:'IBM Plex Sans'">pipeline-evidence.txt</span>). Our local study is the free substitute.</p>
+</div>
+</div>
+<p style="font-size:30px;color:#1C2434;line-height:1.4;width:1560px;background:#FBF1DD;border:1px solid #EAD3A0;border-radius:14px;padding:28px 34px">We turned a limitation into an <b style="color:#8A5B12">evidence-backed finding</b>: the deterministic Processor is free (Level B), but the agentic core is gated behind paid frontier models.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:22px;color:#8A93A6">NT521.R11.ANTN · Reproducing CVE-GENIE</p>
+<aside>We ran the real entry point. The deterministic Processor runs free, but the four LLM modules hardcode paid OpenAI models and main.py exits without an API key — so an end-to-end run is outside free-tier scope by design. This also confirms the paper's per-module model configuration exactly.</aside>
+</section>

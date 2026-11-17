@@ -1,0 +1,37 @@
+<section id="method" data-transition="fade" style="background:#F7F6F1;color:#1C2434;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:46px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#1F8F88">The method</p>
+<h2 style="font-family:'Space Grotesk', Georgia, serif;font-size:60px;font-weight:600;line-height:1.08;color:#152238">Four dependent modules, each a developer ↔ critic loop</h2>
+<div style="display:flex;align-items:stretch;gap:16px;margin-top:8px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:16px;padding:30px 22px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#152238">Processor</h3>
+<p style="font-size:23px;color:#55607A;line-height:1.3">locate repo, version, patch, advisory → knowledge base</p>
+</div>
+<x-shape kind="arrow-right" style="background:#1F9E96;width:52px;height:34px"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:16px;padding:30px 22px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#152238">Builder</h3>
+<p style="font-size:23px;color:#55607A;line-height:1.3">rebuild the vulnerable environment</p>
+</div>
+<x-shape kind="arrow-right" style="background:#1F9E96;width:52px;height:34px"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:16px;padding:30px 22px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#152238">Exploiter</h3>
+<p style="font-size:23px;color:#55607A;line-height:1.3">synthesize &amp; refine the exploit</p>
+</div>
+<x-shape kind="arrow-right" style="background:#1F9E96;width:52px;height:34px"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFDFB;border:1px solid #E2E0D7;border-radius:16px;padding:30px 22px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:30px;font-weight:600;color:#152238">CTF Verifier</h3>
+<p style="font-size:23px;color:#55607A;line-height:1.3">verify in sandbox → print secret flag</p>
+</div>
+</div>
+<div style="display:flex;gap:24px;margin-top:8px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#EAF3F2;border:1px solid #BFE0DC;border-radius:16px;padding:30px 32px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#176B65">Developer ↔ Critic (ReAct, ≤ 5 iters)</h3>
+<p style="font-size:25px;color:#3C5450;line-height:1.35">each module self-corrects: a developer acts with tools, a critic reviews and sends it back</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FBF1DD;border:1px solid #EAD3A0;border-radius:16px;padding:30px 32px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:28px;font-weight:600;color:#8A5B12">Success = a sandboxed Flag Checker</h3>
+<p style="font-size:25px;color:#6B4E1C;line-height:1.35">a deterministic run decides success — not the model's self-report</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:22px;color:#8A93A6">NT521.R11.ANTN · Reproducing CVE-GENIE</p>
+<aside>The pipeline decomposes reproduction into four dependent modules. Each (except the deterministic Processor core and Flag Checker) runs a developer+critic ReAct loop to self-correct, up to five iterations. Crucially, success is judged by a sandboxed Flag Checker printing a secret flag — not by the model claiming success.</aside>
+</section>
